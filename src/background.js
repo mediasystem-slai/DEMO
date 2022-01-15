@@ -1,8 +1,9 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
+const path = require("path");
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Scheme must be registered before the app is ready
@@ -20,7 +21,9 @@ async function createWindow () {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-      contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
+      contextIsolation: true,
+      enableRemoteModule: true,
+      preload: path.resolve(__static, '../src/preload.js')
     }
   })
 
@@ -79,3 +82,38 @@ if (isDevelopment) {
     })
   }
 }
+
+ipcMain.on('test', (event, data) => {
+  // create the window
+  console.log(`in test channel and data = ${data}`)
+  let video_player = new BrowserWindow({ show: true,
+    width: 1440,
+    height: 900,
+    webPreferences: {
+      nodeIntegration: true,
+      plugins: true
+    } })
+  if (process.env.WEBPACK_DEV_SERVER_URL) {
+    console.log('tag1')
+    // Load the url of the dev server if in development mode
+    video_player.loadURL(process.env.WEBPACK_DEV_SERVER_URL + 'video_player.html')
+    if (!process.env.IS_TEST) video_player.webContents.openDevTools()
+  } else {
+    console.log('tag2')
+    video_player.loadURL(`app://./popup/video_player`)
+  }
+
+  video_player.on('closed', () => {
+    video_player = null
+  })
+
+  // here we can send the data to the new window
+  video_player.webContents.on('did-finish-load', () => {
+      video_player.webContents.send('data', data);
+  });
+  
+});
+
+ipcMain.on('test1', (event, data) => {
+  console.log(`in test channel and data = ${data}`)
+});

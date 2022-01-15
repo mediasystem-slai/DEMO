@@ -1,12 +1,13 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
+    <button v-on:click="test">{{ msg }}</button>
     <p>
       For a guide and recipes on how to configure / customize this project,<br>
       check out the
       <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
     </p>
-    <h3>Installed CLI Plugins develop Common work</h3>
+    <h3>Installed CLI Plugins develop Common work  q11</h3>
     <ul>
       <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
       <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-router" target="_blank" rel="noopener">router</a></li>
@@ -33,10 +34,21 @@
 </template>
 
 <script>
+// import { remote } from 'electron'
+// const { remote } = require('electron')
+
 export default {
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+  methods: {
+    test () {
+      console.log('test')
+      // ipcRenderer.send('load-video-window', null)
+      // remote.getCurrentWindow().setFullScreen(true)
+      window.ipcRenderer.send('test', 123)
+    }
   }
 }
 </script>
